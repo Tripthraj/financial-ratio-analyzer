@@ -7,6 +7,8 @@ import ratios
 def cr_to_num(x):
     return x * 10_000_000
 
+def all_filled(*values):
+    return all(v is not None and v > 0 for v in values)
 
 # -------------------------------------------------
 # Page config
@@ -23,9 +25,9 @@ if "page" not in st.session_state:
     st.session_state.page = "home"
 
 
-# -------------------------------------------------
+# =================================================
 # HOME PAGE
-# -------------------------------------------------
+# =================================================
 if st.session_state.page == "home":
 
     st.title("📊 Financial Ratio Analyzer")
@@ -66,13 +68,16 @@ elif st.session_state.page == "liquidity":
     cash = st.number_input("Cash & Marketable Securities (₹ Cr)", min_value=0.0)
 
     if st.button("Calculate Liquidity Ratios"):
-        st.success(f"Current Ratio = {ratios.current_ratio(cr_to_num(ca), cr_to_num(cl)):.2f}")
-        st.success(
-            f"Quick Ratio = {ratios.quick_ratio(cr_to_num(ca), cr_to_num(inventory), cr_to_num(prepaid), cr_to_num(cl)):.2f}"
-        )
-        st.success(
-            f"Cash Ratio = {ratios.cash_ratio(cr_to_num(cash), cr_to_num(cl)):.2f}"
-        )
+        if not all_filled(ca, cl, inventory, prepaid, cash):
+            st.error("❌ All input fields must be filled")
+        else:
+            st.success(f"Current Ratio = {ratios.current_ratio(cr_to_num(ca), cr_to_num(cl)):.2f}")
+            st.success(
+                f"Quick Ratio = {ratios.quick_ratio(cr_to_num(ca), cr_to_num(inventory), cr_to_num(prepaid), cr_to_num(cl)):.2f}"
+            )
+            st.success(
+                f"Cash Ratio = {ratios.cash_ratio(cr_to_num(cash), cr_to_num(cl)):.2f}"
+            )
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
@@ -87,24 +92,27 @@ elif st.session_state.page == "profitability":
     st.title("📈 Profitability Ratios")
 
     revenue = st.number_input("Revenue (₹ Cr)", min_value=0.0)
-    cogs = st.number_input("Cost of Goods Sold (₹ Cr)", min_value=0.0)
+    cogs = st.number_input("COGS (₹ Cr)", min_value=0.0)
     net_income = st.number_input("Net Income (₹ Cr)", min_value=0.0)
     avg_equity = st.number_input("Average Shareholder Equity (₹ Cr)", min_value=0.0)
     avg_assets = st.number_input("Average Total Assets (₹ Cr)", min_value=0.0)
 
     if st.button("Calculate Profitability Ratios"):
-        st.success(
-            f"Gross Profit Margin = {ratios.gross_profit_margin(cr_to_num(revenue), cr_to_num(cogs)):.2f}%"
-        )
-        st.success(
-            f"Net Profit Margin = {ratios.net_profit_margin(cr_to_num(net_income), cr_to_num(revenue)):.2f}%"
-        )
-        st.success(
-            f"ROE = {ratios.roe(cr_to_num(net_income), cr_to_num(avg_equity)):.2f}%"
-        )
-        st.success(
-            f"ROA = {ratios.roa(cr_to_num(net_income), cr_to_num(avg_assets)):.2f}%"
-        )
+        if not all_filled(revenue, cogs, net_income, avg_equity, avg_assets):
+            st.error("❌ All input fields must be filled")
+        else:
+            st.success(
+                f"Gross Profit Margin = {ratios.gross_profit_margin(cr_to_num(revenue), cr_to_num(cogs)):.2f}%"
+            )
+            st.success(
+                f"Net Profit Margin = {ratios.net_profit_margin(cr_to_num(net_income), cr_to_num(revenue)):.2f}%"
+            )
+            st.success(
+                f"ROE = {ratios.roe(cr_to_num(net_income), cr_to_num(avg_equity)):.2f}%"
+            )
+            st.success(
+                f"ROA = {ratios.roa(cr_to_num(net_income), cr_to_num(avg_assets)):.2f}%"
+            )
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
@@ -125,15 +133,18 @@ elif st.session_state.page == "solvency":
     total_assets = st.number_input("Total Assets (₹ Cr)", min_value=0.0)
 
     if st.button("Calculate Solvency Ratios"):
-        st.success(
-            f"Debt–Equity Ratio = {ratios.debt_to_equity(cr_to_num(debt), cr_to_num(equity)):.2f}"
-        )
-        st.success(
-            f"Interest Coverage Ratio = {ratios.interest_coverage(cr_to_num(ebit), cr_to_num(interest)):.2f}"
-        )
-        st.success(
-            f"Equity Ratio = {ratios.equity_ratio(cr_to_num(equity), cr_to_num(total_assets)):.2f}"
-        )
+        if not all_filled(debt, equity, ebit, interest, total_assets):
+            st.error("❌ All input fields must be filled")
+        else:
+            st.success(
+                f"Debt–Equity Ratio = {ratios.debt_to_equity(cr_to_num(debt), cr_to_num(equity)):.2f}"
+            )
+            st.success(
+                f"Interest Coverage Ratio = {ratios.interest_coverage(cr_to_num(ebit), cr_to_num(interest)):.2f}"
+            )
+            st.success(
+                f"Equity Ratio = {ratios.equity_ratio(cr_to_num(equity), cr_to_num(total_assets)):.2f}"
+            )
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
@@ -154,15 +165,18 @@ elif st.session_state.page == "efficiency":
     avg_receivables = st.number_input("Average Accounts Receivable (₹ Cr)", min_value=0.0)
 
     if st.button("Calculate Efficiency Ratios"):
-        st.success(
-            f"Inventory Turnover = {ratios.inventory_turnover(cr_to_num(cogs), cr_to_num(avg_inventory)):.2f}"
-        )
-        st.success(
-            f"Asset Turnover = {ratios.asset_turnover(cr_to_num(sales), cr_to_num(avg_assets)):.2f}"
-        )
-        st.success(
-            f"Days Sales Outstanding = {ratios.days_sales_outstanding(cr_to_num(avg_receivables), cr_to_num(sales)):.2f} days"
-        )
+        if not all_filled(cogs, avg_inventory, sales, avg_assets, avg_receivables):
+            st.error("❌ All input fields must be filled")
+        else:
+            st.success(
+                f"Inventory Turnover = {ratios.inventory_turnover(cr_to_num(cogs), cr_to_num(avg_inventory)):.2f}"
+            )
+            st.success(
+                f"Asset Turnover = {ratios.asset_turnover(cr_to_num(sales), cr_to_num(avg_assets)):.2f}"
+            )
+            st.success(
+                f"Days Sales Outstanding = {ratios.days_sales_outstanding(cr_to_num(avg_receivables), cr_to_num(sales)):.2f} days"
+            )
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
@@ -183,17 +197,16 @@ elif st.session_state.page == "valuation":
     book_value = st.number_input("Book Value per Share (₹)", min_value=0.0)
 
     if st.button("Calculate Valuation Ratios"):
-        eps_val = ratios.eps(cr_to_num(net_income), cr_to_num(shares))
-        pe_val = ratios.pe_ratio(price, cr_to_num(net_income), cr_to_num(shares))
+        if not all_filled(net_income, shares, price, book_value):
+            st.error("❌ All input fields must be filled")
+        else:
+            eps_val = ratios.eps(cr_to_num(net_income), cr_to_num(shares))
+            pe_val = ratios.pe_ratio(price, cr_to_num(net_income), cr_to_num(shares))
 
-        st.success(f"EPS = ₹ {eps_val:.2f}")
-        st.success(f"P/E Ratio = {pe_val:.2f}")
-        st.success(
-            f"Dividend Yield = {ratios.dividend_yield(dividend, price):.2f}%"
-        )
-        st.success(
-            f"P/B Ratio = {ratios.price_to_book(price, book_value):.2f}"
-        )
+            st.success(f"EPS = ₹ {eps_val:.2f}")
+            st.success(f"P/E Ratio = {pe_val:.2f}")
+            st.success(f"Dividend Yield = {ratios.dividend_yield(dividend, price):.2f}%")
+            st.success(f"P/B Ratio = {ratios.price_to_book(price, book_value):.2f}")
 
     if st.button("⬅ Back"):
         st.session_state.page = "home"
